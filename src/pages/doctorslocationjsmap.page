@@ -1,0 +1,68 @@
+<!-- @agarciaodeian -->
+<apex:page standardController="Doctor__c" extensions="DoctorsController" docType="html-5.0" sidebar="false" showheader="false" >    
+
+	<head>
+        <style type="text/css">
+          html { height: 100% }
+          body { height: 100%; margin: 0; padding: 0 }
+          #map-canvas { height: 100% }
+        </style>
+        
+        <script src="https://maps.googleapis.com/maps/api/js?sensor=false"></script>
+        
+        <h1>
+            JavaScript Map
+        </h1>
+        
+        <script>
+            var map;
+        
+            function initialize() {
+                var mapOptions = {
+                    center: new google.maps.LatLng(43.2616465, -2.9393368),
+                    zoom: 15
+                };
+                map = new google.maps.Map(document.getElementById("map-canvas"), mapOptions);
+                loadDoctor();
+            }
+                
+        	function loadDoctor()
+            {
+                Visualforce.remoting.Manager.invokeAction(
+                    '{!$RemoteAction.DoctorsController.findTheDoctor}',
+                    '{!Id}',
+	                function(result, event)
+                    {
+                        if (event.status) {
+                            var name = result.SurgeryName__c;
+                            var lat = result.Location__Latitude__s;
+                            var lng = result.Location__Longitude__s;
+                            addMarker(name, lat, lng);
+                        } else {
+                            alert(event.message);
+                        }
+                    },
+                    {escape: true}
+				);
+            }
+            
+        	function addMarker(name, lat, lng)
+            {
+                var marker = new google.maps.Marker
+                ({
+                        position: new google.maps.LatLng(lat, lng),
+                        map: map,
+                        title: name
+                });
+            }
+        
+            google.maps.event.addDomListener(window, 'load', initialize);
+        
+        </script>
+	</head>
+
+    <body>
+  		<div id="map-canvas"/>
+	</body>
+    
+</apex:page>
